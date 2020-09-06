@@ -4,7 +4,8 @@ const users = require("./users-model")
 const router = express.Router();
 
 router.get("/", (req, res) => {
-	users.find()
+    // console.log(req.query)
+	users.find(req.query)
 		.then((users) => {
 			res.status(200).json(users)
 		})
@@ -98,6 +99,50 @@ router.delete("/:id", (req, res) => {
 				message: "Error removing the user",
 			})
 		})
+})
+
+router.get("/:id/posts", (req, res) => {
+    users.findUserPosts(req.params.id)
+        .then((posts) => {
+            res.status(200).json(posts)
+        })
+        .catch((error) => {
+            res.status(500).json({
+                message: "Error retrieving the user"
+            })
+        })
+})
+
+router.get("/:userId/posts/:postId", (req, res) => {
+    users.findUserPostById(req.params.userId, req.params.postId)
+        .then((post) => {
+            if(post) {
+                res.status(200).json(post)
+            } else {
+                res.status(404).json({
+                    message: "Post was not found!"
+                })
+            }
+        })
+        .catch(() => {
+            res.status(500).json({
+                message: "Could not get user post!"
+            })
+        })
+})
+
+router.post("/:id", (req, res) => {
+    const userId = req.params.id
+
+    users.addUserPost(userId, req.body)
+        .then((post) => {
+            res.status(201).json(post)
+        })
+        .catch(() => {
+            res.status(500).json({
+                message: "Error adding the post"
+            })
+        })    
 })
 
 module.exports = router
